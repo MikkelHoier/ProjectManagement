@@ -16,7 +16,7 @@ namespace FluentAPI.EF
 
         #region Constructors    
         public Employee() { }
-        #endregion
+        
         public Employee(string firstName, string lastName, string socialSecurityNumber, decimal salary, DateTime birthDate, DateTime startDate)
             : this(firstName, lastName, socialSecurityNumber, salary, birthDate, startDate, null) { }
 
@@ -29,9 +29,10 @@ namespace FluentAPI.EF
             BirthDate = birthDate;
             StartDate = startDate;
             ContactInfo = contactInfo;
-        }        
-        
+        }
+        #endregion
 
+        #region Properties
         public string FullName
         {
             get
@@ -82,6 +83,7 @@ namespace FluentAPI.EF
 
         public virtual ContactInfo ContactInfo { get; set; }
 
-        public virtual Team Team { get; set; }
+        public virtual Team Team { get; set; } 
+        #endregion
     }
 }

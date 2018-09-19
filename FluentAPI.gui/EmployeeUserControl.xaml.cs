@@ -26,6 +26,7 @@ namespace FluentAPI.gui
         protected Employee selectedEmployee;
         #endregion
 
+
         #region Constructor
         public EmployeeUserControl()
         {
@@ -36,7 +37,7 @@ namespace FluentAPI.gui
             FillEmployeeDataGrid();
         }
         #endregion        
-        
+
         
         /// <summary>
         /// Fills the dataGridEmployee with Employees from the EF model.
@@ -54,7 +55,10 @@ namespace FluentAPI.gui
             }          
         }      
 
-        protected virtual void EmptyTextBoxes()
+        /// <summary>
+        /// Empty textboxes and datepickers in the employee tab.
+        /// </summary>
+        protected virtual void EmptyGUITools()
         {
             textBoxEmployeeFirstName.Text = string.Empty;
             textBoxEmployeeLastName.Text = string.Empty;
@@ -64,25 +68,12 @@ namespace FluentAPI.gui
             textBoxPhone.Text = string.Empty;
             textBoxSalary.Text = string.Empty;
             textBoxSocialSecurityNumber.Text = string.Empty;
-        }        
-
-        private void ButtonUpdate_ClickEvent(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (AllEmployeeInputToolsAreValid())
-                {
-                    AssignValuesTo(selectedEmployee);
-                    model.SaveChanges();
-                    FillEmployeeDataGrid();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Der skete en uvented fejl: {ex.ToString()}", "Fejl", MessageBoxButton.OK);                
-            }
         }
 
+        /// <summary>
+        /// Assign values from textboxes and datepickers to a employe object. Note: A ContactInfo object will not be assigned to the Employee object unless TextBoxEmailIsValid() and TextBoxPhoneIsValid() returns true.
+        /// </summary>
+        /// <param name="employee"></param>
         public void AssignValuesTo(Employee employee)
         {
             employee.FirstName = textBoxEmployeeFirstName.Text;
@@ -191,9 +182,26 @@ namespace FluentAPI.gui
                 buttonSave.IsEnabled = true;
                 buttonUpdate.IsEnabled = false;
                 buttonDelete.IsEnabled = false;
-                EmptyTextBoxes();
+                EmptyGUITools();
             }
         }        
+
+        private void ButtonUpdate_ClickEvent(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (AllEmployeeInputToolsAreValid())
+                {
+                    AssignValuesTo(selectedEmployee);
+                    model.SaveChanges();
+                    FillEmployeeDataGrid();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Der skete en uvented fejl: {ex.ToString()}", "Fejl", MessageBoxButton.OK);                
+            }
+        }
         #endregion
 
 

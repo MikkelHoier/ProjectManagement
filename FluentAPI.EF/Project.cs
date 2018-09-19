@@ -29,7 +29,8 @@ namespace FluentAPI.EF
             EndDate = endDate;
         }
         #endregion
-               
+
+        #region Properties
         [StringLength(50)]
         public string Name
         {
@@ -54,17 +55,18 @@ namespace FluentAPI.EF
         public DateTime? EndDate { get; set; }
 
         [Column(TypeName = "money")]
-        public decimal? Budget {
+        public decimal? Budget
+        {
             get
             {
                 return budget;
             }
             set
             {
-                if(value <0)
+                if (value < 0)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
-                }                
+                }
                 else
                 {
                     budget = value;
@@ -73,6 +75,7 @@ namespace FluentAPI.EF
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Team> Teams { get; set; }
+        public virtual ICollection<Team> Teams { get; set; } 
+        #endregion
     }
 }
