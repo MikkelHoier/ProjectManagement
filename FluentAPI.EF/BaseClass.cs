@@ -20,6 +20,6 @@ namespace FluentAPI.EF
             {                
                 id = value;
             }
-        }
+        }        
     }
 }

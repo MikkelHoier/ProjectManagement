@@ -35,8 +35,71 @@ namespace FluentAPI.gui
             buttonDelete.IsEnabled = false;
             FillEmployeeDataGrid();
         }
-        #endregion
+        #endregion        
         
+        
+        /// <summary>
+        /// Fills the dataGridEmployee with Employees from the EF model.
+        /// </summary>
+        public void FillEmployeeDataGrid()
+        {
+            try
+            {
+                dataGridEmployee.ItemsSource = model.Employees.ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Der skete en unvented fejl: {ex.ToString()}","Fejl",MessageBoxButton.OK);
+                throw;
+            }          
+        }      
+
+        protected virtual void EmptyTextBoxes()
+        {
+            textBoxEmployeeFirstName.Text = string.Empty;
+            textBoxEmployeeLastName.Text = string.Empty;
+            datePickerBirthDate.SelectedDate = null;
+            datePickerStartDate.SelectedDate = null;
+            textBoxEmail.Text = string.Empty;
+            textBoxPhone.Text = string.Empty;
+            textBoxSalary.Text = string.Empty;
+            textBoxSocialSecurityNumber.Text = string.Empty;
+        }        
+
+        private void ButtonUpdate_ClickEvent(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (AllEmployeeInputToolsAreValid())
+                {
+                    AssignValuesTo(selectedEmployee);
+                    model.SaveChanges();
+                    FillEmployeeDataGrid();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Der skete en uvented fejl: {ex.ToString()}", "Fejl", MessageBoxButton.OK);                
+            }
+        }
+
+        public void AssignValuesTo(Employee employee)
+        {
+            employee.FirstName = textBoxEmployeeFirstName.Text;
+            employee.LastName = textBoxEmployeeLastName.Text;
+            employee.BirthDate = datePickerBirthDate.SelectedDate;
+            employee.SocialSecurityNumber = textBoxSocialSecurityNumber.Text;
+            employee.StartDate = datePickerStartDate.SelectedDate;
+            employee.Salary = Convert.ToDecimal(textBoxSalary.Text);
+
+            if(TextBoxEmailIsValid() || TextBoxPhoneIsValid())
+            {
+                employee.ContactInfo = new ContactInfo();
+            }
+                              
+        }
+
+        #region Event Handlers
         private void DataGrid_Employees_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             try
@@ -131,36 +194,53 @@ namespace FluentAPI.gui
                 EmptyTextBoxes();
             }
         }        
-        
-        /// <summary>
-        /// Fills the dataGridEmployee with Employees from the EF model.
-        /// </summary>
-        public void FillEmployeeDataGrid()
-        {
-            try
-            {
-                dataGridEmployee.ItemsSource = model.Employees.ToList();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Der skete en unvented fejl: {ex.ToString()}","Fejl",MessageBoxButton.OK);
-                throw;
-            }          
-        }
+        #endregion
 
-        /// <summary>
-        /// Returns true if tools that can take input from the user in the Employee tab has a value in them. Note it dosen't validate data needed for ContactInfomation.
-        /// </summary>
-        /// <returns></returns>
-        private bool AllEmployeeInputToolsAreValid()
+
+        #region Input Validation Methods
+        private bool TextBoxSalaryIsValid()
         {
-            if(TextBoxEmployeeFirstNameIsValid() && TextBoxSalaryIsValid() && TextBoxEmployeeLastNameIsValid() && TextBoxSocialSecurityNumberIsValid() && DatePickerBirthDateIsValid() && DatePickerStartDateIsValid())
+            if (string.IsNullOrWhiteSpace(textBoxSalary.Text))
             {
-                return true;
+                MessageBox.Show("Løn skal udfyldes", "Fejl", MessageBoxButton.OK);
+                return false;
             }
             else
             {
+                foreach (char c in textBoxSalary.Text)
+                {
+                    if (char.IsLetter(c))
+                    {
+                        MessageBox.Show("Løn må kun indholde tal", "Fejl", MessageBoxButton.OK);
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        private bool TextBoxPhoneIsValid()
+        {
+            if (string.IsNullOrWhiteSpace(textBoxPhone.Text))
+            {
                 return false;
+            }
+            else if (textBoxEmail.Text == string.Empty)
+            {
+                MessageBox.Show("Hvis Telefon Nummer skal udfyldes skal Email også udfyldes.", "Fejl", MessageBoxButton.OK);
+                return false;
+            }
+            else
+            {
+                foreach (char c in textBoxPhone.Text)
+                {
+                    if (char.IsLetter(c))
+                    {
+                        MessageBox.Show("Telefon Nummer må ikke indholde bogstaver.", "Fejl", MessageBoxButton.OK);
+                        return false;
+                    }
+                }
+                return true;
             }
         } 
 
@@ -173,19 +253,6 @@ namespace FluentAPI.gui
             else
             {
                 MessageBox.Show("Fornavn skal udfyldes, må ikke inholde numre, og må ikke være længer en 100 karakter.", "Fejl", MessageBoxButton.OK);
-                return false;
-            }
-        }
-
-        private bool TextBoxEmployeeLastNameIsValid()
-        {
-            if (Validator.NameIsValid(textBoxEmployeeLastName.Text))
-            {
-                return true;
-            }
-            else
-            {
-                MessageBox.Show("Efternavn skal udfyldes, må ikke inholde numre, og må ikke være længer en 100 karakter.", "Fejl", MessageBoxButton.OK);
                 return false;
             }
         }
@@ -212,55 +279,13 @@ namespace FluentAPI.gui
             }
         }
 
-        private bool TextBoxPhoneIsValid()
-        {
-            if(string.IsNullOrWhiteSpace(textBoxPhone.Text))
-            {
-                return false;
-            }
-            else if (textBoxEmail.Text == string.Empty)
-            {
-                MessageBox.Show("Hvis Telefon Nummer skal udfyldes skal Email også udfyldes.", "Fejl", MessageBoxButton.OK);
-                return false;
-            }
-            else
-            {
-                foreach (char c in textBoxPhone.Text)
-                {
-                    if (char.IsLetter(c))
-                    {
-                        MessageBox.Show("Telefon Nummer må ikke indholde bogstaver.", "Fejl", MessageBoxButton.OK);
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }
-
-        private bool TextBoxSalaryIsValid()
-        {                      
-            if (string.IsNullOrWhiteSpace(textBoxSalary.Text))
-            {
-                MessageBox.Show("Løn skal udfyldes", "Fejl", MessageBoxButton.OK);
-                return false;
-            }            
-            else
-            {
-                foreach(char c in textBoxSalary.Text)
-                {
-                    if (char.IsLetter(c))
-                    {
-                        MessageBox.Show("Løn må kun indholde tal","Fejl",MessageBoxButton.OK);
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }
-
+        /// <summary>
+        /// Validates textBoxSocialSecurityNumber. If textBoxSocialSecurityNumber content is null or empty, or contain a letter, returns false with appropiate message box.
+        /// </summary>
+        /// <returns></returns>
         private bool TextBoxSocialSecurityNumberIsValid()
         {
-            if(textBoxSocialSecurityNumber.Text == string.Empty)
+            if(string.IsNullOrWhiteSpace(textBoxSocialSecurityNumber.Text))
             {
                 MessageBox.Show("CPR nummer skal udfyldes");
                 return false;
@@ -328,49 +353,34 @@ namespace FluentAPI.gui
             }
         }
 
-        protected virtual void EmptyTextBoxes()
+        private bool TextBoxEmployeeLastNameIsValid()
         {
-            textBoxEmployeeFirstName.Text = string.Empty;
-            textBoxEmployeeLastName.Text = string.Empty;
-            datePickerBirthDate.SelectedDate = null;
-            datePickerStartDate.SelectedDate = null;
-            textBoxEmail.Text = string.Empty;
-            textBoxPhone.Text = string.Empty;
-            textBoxSalary.Text = string.Empty;
-            textBoxSocialSecurityNumber.Text = string.Empty;
-        }        
-
-        private void ButtonUpdate_ClickEvent(object sender, RoutedEventArgs e)
-        {
-            try
+            if (Validator.NameIsValid(textBoxEmployeeLastName.Text))
             {
-                if (AllEmployeeInputToolsAreValid())
-                {
-                    AssignValuesTo(selectedEmployee);
-                    model.SaveChanges();
-                    FillEmployeeDataGrid();
-                }
+                return true;
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show($"Der skete en uvented fejl: {ex.ToString()}", "Fejl", MessageBoxButton.OK);                
+                MessageBox.Show("Efternavn skal udfyldes, må ikke inholde numre, og må ikke være længer en 100 karakter.", "Fejl", MessageBoxButton.OK);
+                return false;
             }
         }
 
-        public void AssignValuesTo(Employee employee)
+        /// <summary>
+        /// Returns true if tools that can take input from the user in the Employee tab has a value in them. Note it dosen't validate data needed for ContactInfomation.
+        /// </summary>
+        /// <returns></returns>
+        private bool AllEmployeeInputToolsAreValid()
         {
-            employee.FirstName = textBoxEmployeeFirstName.Text;
-            employee.LastName = textBoxEmployeeLastName.Text;
-            employee.BirthDate = datePickerBirthDate.SelectedDate;
-            employee.SocialSecurityNumber = textBoxSocialSecurityNumber.Text;
-            employee.StartDate = datePickerStartDate.SelectedDate;
-            employee.Salary = Convert.ToDecimal(textBoxSalary.Text);
-
-            if(TextBoxEmailIsValid() || TextBoxPhoneIsValid())
+            if(TextBoxEmployeeFirstNameIsValid() && TextBoxSalaryIsValid() && TextBoxEmployeeLastNameIsValid() && TextBoxSocialSecurityNumberIsValid() && DatePickerBirthDateIsValid() && DatePickerStartDateIsValid())
             {
-                employee.ContactInfo = new ContactInfo();
+                return true;
             }
-                              
-        }
+            else
+            {
+                return false;
+            }
+        } 
+        #endregion
     }    
 }

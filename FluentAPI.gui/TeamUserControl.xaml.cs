@@ -37,20 +37,7 @@ namespace FluentAPI.gui
             buttonUpdateTeam.IsEnabled = false;
         }
 
-        private void ButtonSaveTeam_ClickEvent(object sender, RoutedEventArgs e)
-        {
-            if (TeamToolsIsValid())
-                {
-                Team team = new Team(textBoxTeamName.Text, datePickerStartDate.SelectedDate.Value, datePickerEndDate.SelectedDate.Value);
-                if (TextBoxTeamDescriptionIsValid())
-                {
-                    team.Description = textBoxTeamDescription.Text;
-                }
-                model.Teams.Add(team);
-                model.SaveChanges();
-                FillTeamDataGrid();
-            }
-        }
+        
 
         private void FillTeamDataGrid()
         {
@@ -86,41 +73,22 @@ namespace FluentAPI.gui
                 comboBoxEmployees.DisplayMemberPath = "FullName";
             }
         }
-        
-        private void DataGridTeams_SelectionChanged(object sender, SelectionChangedEventArgs e)
+
+         private void EmptyTeamTools()
         {
-            selectedTeam = dataGridTeams.SelectedItem as Team;
-
-            if (selectedTeam == null)
-            {
-                return;
-            }
-            else
-            {
-                textBoxTeamName.Text = selectedTeam.Name;
-                textBoxTeamDescription.Text = selectedTeam.Description;
-                datePickerStartDate.SelectedDate = selectedTeam.StartDate;
-                datePickerEndDate.SelectedDate = selectedTeam.EndDate;
-
-            }
-
-            if(selectedTeam.Employees != null)
-            {
-                FillEmployeeDataGrid();
-            }
-
-            FillEmployeeComboBox();
-
-            buttonAddEmployee.IsEnabled = true;
-            buttonSaveTeam.IsEnabled = false;
-            buttonDeleteTeam.IsEnabled = true;
-            comboBoxEmployees.IsEnabled = true;
-            buttonUpdateTeam.IsEnabled = true;
+            textBoxTeamName.Text = string.Empty;
+            textBoxTeamDescription.Text = string.Empty;
+            datePickerStartDate.SelectedDate = null;
+            datePickerEndDate.SelectedDate = null;
+            comboBoxEmployees.IsEnabled = false;
+            buttonAddEmployee.IsEnabled = false;
+            buttonDeleteEmployee.IsEnabled = false;
         }
 
+        #region Validation Methods
         private bool TeamToolsIsValid()
         {
-            if(TextBoxTeamNameIsValid() && DatePickerStartDateIsValid() && DatePickerEndDateIsValid())
+            if (TextBoxTeamNameIsValid() && DatePickerStartDateIsValid() && DatePickerEndDateIsValid())
             {
                 return true;
             }
@@ -135,8 +103,8 @@ namespace FluentAPI.gui
             if (string.IsNullOrWhiteSpace(textBoxTeamName.Text))
             {
                 MessageBox.Show("Hold Navn skal udfyldes", "Fejl", MessageBoxButton.OK);
-                return false;                
-            }           
+                return false;
+            }
             else
             {
                 return true;
@@ -145,7 +113,7 @@ namespace FluentAPI.gui
 
         private bool TextBoxTeamDescriptionIsValid()
         {
-            if(textBoxTeamDescription.Text == null)
+            if (textBoxTeamDescription.Text == null)
             {
                 return false;
             }
@@ -180,7 +148,7 @@ namespace FluentAPI.gui
                 MessageBox.Show("Ingen Slut Dato valgt.", "Fejl", MessageBoxButton.OK);
                 return false;
             }
-            else if(datePickerEndDate.SelectedDate < datePickerStartDate.SelectedDate)
+            else if (datePickerEndDate.SelectedDate < datePickerStartDate.SelectedDate)
             {
                 MessageBox.Show("Sluts Dato kan ikke være før Starts Dato.", "Fejl", MessageBoxButton.OK);
                 return false;
@@ -189,20 +157,42 @@ namespace FluentAPI.gui
             {
                 return true;
             }
-        }
+        } 
+        #endregion      
 
-        private void EmptyTeamTools()
+        #region Event Handlers
+        private void DataGridTeams_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            textBoxTeamName.Text = string.Empty;
-            textBoxTeamDescription.Text = string.Empty;
-            datePickerStartDate.SelectedDate = null;
-            datePickerEndDate.SelectedDate = null;
-            comboBoxEmployees.IsEnabled = false;
-            buttonAddEmployee.IsEnabled = false;
-            buttonDeleteEmployee.IsEnabled = false;
+            selectedTeam = dataGridTeams.SelectedItem as Team;
+
+            if (selectedTeam == null)
+            {
+                return;
+            }
+            else
+            {
+                textBoxTeamName.Text = selectedTeam.Name;
+                textBoxTeamDescription.Text = selectedTeam.Description;
+                datePickerStartDate.SelectedDate = selectedTeam.StartDate;
+                datePickerEndDate.SelectedDate = selectedTeam.EndDate;
+
+            }
+
+            if(selectedTeam.Employees != null)
+            {
+                FillEmployeeDataGrid();
+            }
+
+            FillEmployeeComboBox();
+
+            buttonAddEmployee.IsEnabled = true;
+            buttonSaveTeam.IsEnabled = false;
+            buttonDeleteTeam.IsEnabled = true;
+            comboBoxEmployees.IsEnabled = true;
+            buttonUpdateTeam.IsEnabled = true;
         }
 
-        /// <summary>
+         /// <summary>
         /// Deselects everything when escape is pressed while dataGridTeam has focus.
         /// </summary>
         /// <param name="sender"></param>
@@ -225,19 +215,33 @@ namespace FluentAPI.gui
 
         private void ButtonDeleteTeam_ClickEvent(object sender, RoutedEventArgs e)
         {
-            Team team = dataGridTeams.SelectedItem as Team;
-            model.Teams.Remove(team);
-            model.SaveChanges();
-            FillTeamDataGrid();
+            try
+            {
+                Team team = dataGridTeams.SelectedItem as Team;
+                model.Teams.Remove(team);
+                model.SaveChanges();
+                FillTeamDataGrid();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Der skete uvented fejl: {ex.ToString()}", "Fejl", MessageBoxButton.OK);
+            }
         }
                         
         private void ButtonDeleteEmployee_ClickEvent(object sender, RoutedEventArgs e)
         {
-            selectedTeam.Employees.Remove(dataGridEmployees.SelectedItem as Employee);
-            model.SaveChanges();
-            FillTeamDataGrid();
-            FillEmployeeDataGrid();
-            FillEmployeeComboBox();
+            try
+            {
+                selectedTeam.Employees.Remove(dataGridEmployees.SelectedItem as Employee);
+                model.SaveChanges();
+                FillTeamDataGrid();
+                FillEmployeeDataGrid();
+                FillEmployeeComboBox();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Der skete uvented fejl: {ex.ToString()}", "Fejl", MessageBoxButton.OK);
+            }
         }
 
         private void ButtonAddEmployee_ClickEvent(object sender, RoutedEventArgs e)
@@ -270,7 +274,7 @@ namespace FluentAPI.gui
         }
 
         private void ButtonUpdateTeam_ClickEvent(object sender, RoutedEventArgs e)
-        {
+        {            
             try
             {
                 if (TeamToolsIsValid())
@@ -289,5 +293,21 @@ namespace FluentAPI.gui
                 MessageBox.Show($"Der skete en uvented fejl: {ex.ToString()}", "Fejl", MessageBoxButton.OK);
             }
         }
+
+        private void ButtonSaveTeam_ClickEvent(object sender, RoutedEventArgs e)
+        {
+            if (TeamToolsIsValid())
+                {
+                Team team = new Team(textBoxTeamName.Text, datePickerStartDate.SelectedDate.Value, datePickerEndDate.SelectedDate.Value);
+                if (TextBoxTeamDescriptionIsValid())
+                {
+                    team.Description = textBoxTeamDescription.Text;
+                }
+                model.Teams.Add(team);
+                model.SaveChanges();
+                FillTeamDataGrid();
+            }
+        }
+        #endregion
     }
 }

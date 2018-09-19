@@ -58,9 +58,19 @@ namespace FluentAPI.gui
             }
         }
 
+        protected void EmptyTools()
+        {
+            textBoxProjectName.Text = string.Empty;
+            textBoxProjectDescription.Text = string.Empty;
+            textBoxBudget.Text = string.Empty;
+            datePickerProjectStartDate.SelectedDate = null;
+            datePickerProjectEndDate.SelectedDate = null;
+        }
+
+        #region Validation Methods
         protected bool ProjectToolsIsValid()
         {
-            if(TextBoxProjectNameIsValid() && DatePickerProjectStartDateIsValid() && DatePickerProjectEndDateIsValid() && TextBoxBudgetIsValid())
+            if (TextBoxProjectNameIsValid() && DatePickerProjectStartDateIsValid() && DatePickerProjectEndDateIsValid() && TextBoxBudgetIsValid())
             {
                 return true;
             }
@@ -72,7 +82,7 @@ namespace FluentAPI.gui
 
         protected bool TextBoxProjectNameIsValid()
         {
-            if(textBoxProjectName.Text == string.Empty)
+            if (textBoxProjectName.Text == string.Empty)
             {
                 return false;
             }
@@ -83,8 +93,8 @@ namespace FluentAPI.gui
         }
 
         protected bool TextBoxBudgetIsValid()
-        {            
-            if(string.IsNullOrEmpty(textBoxBudget.Text))
+        {
+            if (string.IsNullOrEmpty(textBoxBudget.Text))
             {
                 MessageBox.Show("Budget ikke udfyldt", "Fejl", MessageBoxButton.OK);
                 return false;
@@ -97,15 +107,15 @@ namespace FluentAPI.gui
                     {
                         MessageBox.Show("Budget må ikke inholde bogstaver", "Fejl", MessageBoxButton.OK);
                         return false;
-                    }                  
+                    }
                 }
                 return true;
             }
         }
-        
+
         protected bool TextBoxProjectDescriptionIsValid()
         {
-            if(textBoxProjectDescription.Text == string.Empty)
+            if (textBoxProjectDescription.Text == string.Empty)
             {
                 return false;
             }
@@ -137,8 +147,10 @@ namespace FluentAPI.gui
             {
                 return true;
             }
-        }
+        } 
+        #endregion
 
+        #region Event Handlers
         private void ButtonSaveProject_ClickEvent(object sender, RoutedEventArgs e)
         {
             if (ProjectToolsIsValid())
@@ -158,7 +170,7 @@ namespace FluentAPI.gui
         {
             selectedProject = dataGridProjects.SelectedItem as Project;
 
-            if(selectedProject == null)
+            if (selectedProject == null)
             {
                 return;
             }
@@ -171,7 +183,7 @@ namespace FluentAPI.gui
                 datePickerProjectEndDate.SelectedDate = selectedProject.EndDate;
             }
 
-            if(selectedProject.Teams != null)
+            if (selectedProject.Teams != null)
             {
                 FillTeamDataGrid();
             }
@@ -207,7 +219,7 @@ namespace FluentAPI.gui
 
         private void dataGridProjects_KeyDownEvent(object sender, KeyEventArgs e)
         {
-            if(e.Key == Key.Escape)
+            if (e.Key == Key.Escape)
             {
                 dataGridProjects.SelectedItem = selectedProject = null;
                 buttonDeleteProject.IsEnabled = false;
@@ -220,15 +232,6 @@ namespace FluentAPI.gui
                 dataGridTeams.ItemsSource = null;
                 EmptyTools();
             }
-        }
-
-        protected void EmptyTools()
-        {
-            textBoxProjectName.Text = string.Empty;
-            textBoxProjectDescription.Text = string.Empty;
-            textBoxBudget.Text = string.Empty;
-            datePickerProjectStartDate.SelectedDate = null;
-            datePickerProjectEndDate.SelectedDate = null;
         }
 
         private void ButtonUpdateProject_ClickEvent(object sender, RoutedEventArgs e)
@@ -251,5 +254,6 @@ namespace FluentAPI.gui
                 MessageBox.Show($"Der skete en uvented fejl: {ex.ToString()}", "Fejl", MessageBoxButton.OK);
             }
         }
+        #endregion        
     }
 }
